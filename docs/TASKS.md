@@ -46,7 +46,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
   `<html class="dark">`, Geist via `next/font`, `@layer base` `body { bg-background text-foreground }`).
   Added a `viewport` export (`colorScheme: "dark"` + `themeColor` ≈ `--background`) so mobile
   browser chrome is dark, and switched the body to `min-h-svh` for correct mobile viewport height.
-- [ ] **1.2** Responsive nav/top bar (collapses to a sheet on mobile) + footer. Thumb-reachable.
+- [x] **1.2** Responsive nav/top bar (collapses to a sheet on mobile) + footer. Thumb-reachable.
+  _Done:_ `SiteHeader` (sticky, translucent, brand + desktop nav at md+) + `MobileNav`
+  (client island: hamburger → shadcn `Sheet`, 44px trigger) + `SiteFooter`, all mounted in the
+  root layout (content area flex-grows so the footer sits at the bottom). Links come from a
+  typed `nav-config.ts` (guest set for now; auth-aware variants in 2.3 — `/login`,`/apply` routes
+  arrive in later phases). Playwright now also asserts the desktop-hidden / mobile-sheet behaviour.
 - [ ] **1.3** Shared UI building blocks wired to tokens (page container, section, card grid).
 - [ ] **1.4** Motion primitives: a reusable entrance animation + page/route transition,
   both guarded by `prefers-reduced-motion`.

@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,7 +42,10 @@ export default function RootLayout({
       className={`dark ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body className="min-h-svh flex flex-col">
-        {children}
+        <SiteHeader />
+        {/* Content area grows so the footer is pushed to the bottom on short pages. */}
+        <div className="flex flex-1 flex-col">{children}</div>
+        <SiteFooter />
         {/* Dark-only app: pin Sonner to the dark theme (no next-themes here). */}
         <Toaster theme="dark" position="top-center" richColors />
       </body>
