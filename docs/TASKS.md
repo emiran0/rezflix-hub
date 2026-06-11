@@ -20,8 +20,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
   `init` creates the full `User` model + `Role`/`ApplicationStatus` enums + unique indexes
   (username, email, jellyfinUserId) — this **front-loads most of task 2.1** (the foundation
   Auth.js needs in 0.4); 2.1 is now mostly a verification/refinement step.
-- [ ] **0.4** Add Auth.js v5 (NextAuth) with the Prisma adapter + Credentials provider (JWT
-  sessions). Set `AUTH_SECRET`. Confirm a session cookie can be issued for a test user.
+- [x] **0.4** Add Auth.js v5 (NextAuth) with the Credentials provider (JWT sessions).
+  Set `AUTH_SECRET`. Confirm a session cookie can be issued for a test user.
+  _Done:_ **No PrismaAdapter** — per the reviewer flag, the Credentials provider only supports
+  JWT sessions, so the adapter's DB-session machinery is unused; `authorize` queries
+  `prisma.user` directly (`auth.ts`) and verifies the hash via `lib/password.ts` (bcryptjs,
+  pure-JS, cost 12). `app/api/auth/[...nextauth]/route.ts` exposes the handlers; `types/next-auth.d.ts`
+  augments the session/JWT with `id`/`username`/`role`. **Env rename:** `.env`/`.env.example`
+  still carry BetterAuth-era `BETTER_AUTH_SECRET`/`BETTER_AUTH_URL` — these must become
+  `AUTH_SECRET`/`AUTH_URL`, and `ADMIN_EMAILS` (ARCHITECTURE §5.4) must be added (owner edits `.env*`).
 - [ ] **0.5** Add Zod, Motion, `next/font`, Sonner. Set up Vitest + Playwright with one
   trivial passing test each. Add `.env.example` keys to `.env`.
 - [ ] **0.6** Project hygiene: `.gitignore` (ensure `.env` ignored), npm scripts

@@ -74,9 +74,11 @@ separate service in v1 — no benefit at this scale.
 > Drizzle remains the documented ORM fallback if Prisma proves awkward.
 
 ## 4. Data model (sketch — refine during build)
-We own the `user` table (username/password identity); Auth.js reads it via the Prisma adapter.
-Because we use the **Credentials provider with JWT sessions**, there is **no `session` table** —
-the session lives in a signed httpOnly cookie. Indicative shape:
+We own the `user` table (username/password identity); Auth.js reads it directly in the
+Credentials `authorize` callback (**no Prisma adapter** — the adapter only manages DB sessions,
+which the Credentials provider doesn't use). Because we use the **Credentials provider with JWT
+sessions**, there is **no `session` table** — the session lives in a signed httpOnly cookie.
+Indicative shape:
 
 - **user**: id, username (unique), email (unique), passwordHash, displayName, role
   (`applicant`/`member`/`admin`), applicationStatus (`none`/`pending`/`approved`/`rejected`),

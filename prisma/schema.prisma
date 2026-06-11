@@ -1,7 +1,8 @@
 // REZFLIX Hub — Prisma schema.
-// The Hub owns identity (username/password). Auth.js reads this `User` table via the
-// Prisma adapter; because we use the Credentials provider with JWT sessions there is no
-// `Session` table (the session lives in a signed httpOnly cookie). See docs/ARCHITECTURE.md §4–5.
+// The Hub owns identity (username/password). Auth.js reads this `User` table directly in
+// the Credentials `authorize` callback (no Prisma adapter); because we use the Credentials
+// provider with JWT sessions there is no `Session` table (the session lives in a signed
+// httpOnly cookie). See docs/ARCHITECTURE.md §4–5.
 //
 // Schema changes: always `prisma migrate dev` (local) / `migrate deploy` (prod). Never `db push`.
 
