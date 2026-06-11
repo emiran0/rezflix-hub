@@ -29,8 +29,14 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
   augments the session/JWT with `id`/`username`/`role`. **Env rename:** `.env`/`.env.example`
   still carry BetterAuth-era `BETTER_AUTH_SECRET`/`BETTER_AUTH_URL` — these must become
   `AUTH_SECRET`/`AUTH_URL`, and `ADMIN_EMAILS` (ARCHITECTURE §5.4) must be added (owner edits `.env*`).
-- [ ] **0.5** Add Zod, Motion, `next/font`, Sonner. Set up Vitest + Playwright with one
+- [x] **0.5** Add Zod, Motion, `next/font`, Sonner. Set up Vitest + Playwright with one
   trivial passing test each. Add `.env.example` keys to `.env`.
+  _Done:_ zod 4, motion 12, sonner 2 added; `next/font` (Geist) was already wired in 0.1.
+  Sonner `<Toaster theme="dark">` mounted in the root layout (no next-themes — dark is pinned).
+  **Vitest** (jsdom + Testing Library, `@/` alias mirrored) with `components/ui/button.test.tsx`;
+  **Playwright** (`e2e/home.spec.ts`) runs on **desktop + Pixel-5 mobile** projects, boots the dev
+  server itself. Scripts: `test`, `test:watch`, `test:e2e`. `.env.example` was fully rebuilt with
+  placeholders in the prior step; copying the new keys into the real `.env` is owner-managed.
 - [ ] **0.6** Project hygiene: `.gitignore` (ensure `.env` ignored), npm scripts
   (`dev/build/start/lint/test/test:e2e`), basic README in-repo.
 
