@@ -1,5 +1,6 @@
 import Link from "next/link"
 
+import { PageContainer } from "@/components/page-container"
 import { mainNavLinks } from "@/components/nav-config"
 
 // App shell footer. Stacks on mobile, spreads on sm+. Tokens only.
@@ -8,7 +9,7 @@ export function SiteFooter() {
 
   return (
     <footer className="border-t border-border">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-3 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <PageContainer className="flex flex-col gap-3 py-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
         <p>© {year} REZFLIX Hub</p>
         {/* -my-2 keeps the footer compact while min-h-11 gives 44px tap targets (§7). */}
         <nav className="-my-2 flex gap-2 sm:gap-4" aria-label="Footer">
@@ -22,7 +23,7 @@ export function SiteFooter() {
             </Link>
           ))}
         </nav>
-      </div>
+      </PageContainer>
     </footer>
   )
 }

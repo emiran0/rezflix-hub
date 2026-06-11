@@ -52,7 +52,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
   root layout (content area flex-grows so the footer sits at the bottom). Links come from a
   typed `nav-config.ts` (guest set for now; auth-aware variants in 2.3 — `/login`,`/apply` routes
   arrive in later phases). Playwright now also asserts the desktop-hidden / mobile-sheet behaviour.
-- [ ] **1.3** Shared UI building blocks wired to tokens (page container, section, card grid).
+- [x] **1.3** Shared UI building blocks wired to tokens (page container, section, card grid).
+  _Done:_ `PageContainer` (`max-w-6xl` + matching gutters), `Section` (vertical rhythm), and
+  `CardGrid` (1→2→3 cols) — all thin `cn()`-mergeable wrappers, tokens/utilities only. The
+  shell header + footer were refactored to consume `PageContainer` (DRYs the duplicated rhythm
+  the 1.2 review flagged). Unit test covers render + class-merge wiring.
 - [ ] **1.4** Motion primitives: a reusable entrance animation + page/route transition,
   both guarded by `prefers-reduced-motion`.
 

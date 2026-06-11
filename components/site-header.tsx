@@ -2,6 +2,7 @@ import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { MobileNav } from "@/components/mobile-nav"
+import { PageContainer } from "@/components/page-container"
 import { mainNavLinks } from "@/components/nav-config"
 
 // App shell top bar. Server component — the only client island is <MobileNav>.
@@ -9,7 +10,7 @@ import { mainNavLinks } from "@/components/nav-config"
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+      <PageContainer className="flex h-16 items-center justify-between">
         <Link href="/" className="text-lg font-semibold tracking-tight">
           REZFLIX <span className="text-primary">Hub</span>
         </Link>
@@ -27,7 +28,7 @@ export function SiteHeader() {
         </nav>
 
         <MobileNav />
-      </div>
+      </PageContainer>
     </header>
   )
 }
