@@ -118,3 +118,20 @@
     @apply font-sans;
   }
 }
+
+/*
+ * Global reduced-motion guard (DESIGN-SYSTEM §6/§8). Neutralizes CSS-driven
+ * animation/transition — Radix/Sheet, Sonner, tw-animate, hover transitions — for
+ * users who asked for less motion. Motion (JS) components guard separately via
+ * `useReducedMotion`, since their transforms aren't CSS animations this can reach.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

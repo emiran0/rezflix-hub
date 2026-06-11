@@ -57,8 +57,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
   `CardGrid` (1→2→3 cols) — all thin `cn()`-mergeable wrappers, tokens/utilities only. The
   shell header + footer were refactored to consume `PageContainer` (DRYs the duplicated rhythm
   the 1.2 review flagged). Unit test covers render + class-merge wiring.
-- [ ] **1.4** Motion primitives: a reusable entrance animation + page/route transition,
+- [x] **1.4** Motion primitives: a reusable entrance animation + page/route transition,
   both guarded by `prefers-reduced-motion`.
+  _Done:_ `FadeIn` (subtle fade+rise entrance) and `PageTransition` (route-keyed enter, in the
+  layout content area) under `components/motion/`, both JS-guarded via Motion's `useReducedMotion`.
+  Plus a **global** `@media (prefers-reduced-motion: reduce)` reset in `globals.css` that
+  neutralizes CSS-driven animation (Radix/Sheet, Sonner, tw-animate, hovers) — this resolves the
+  deferred Sheet/Sonner reduced-motion items. `FadeIn` demoed on the temp landing card. Unit
+  smoke tests + a jsdom `matchMedia` polyfill added. (Used Motion for the route transition rather
+  than the View Transitions API — reliable in the App Router today; revisit View Transitions later.)
 
 ## Phase 2 — Identity & username/password auth
 - [ ] **2.1** User model fields (role, applicationStatus, username unique, email unique,
