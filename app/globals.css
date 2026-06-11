@@ -73,9 +73,11 @@
   --secondary-foreground: oklch(0.95 0.005 270);
   --accent-foreground: oklch(0.95 0.005 270);
 
-  /* brand accent — ONE warm red-orange, used with discipline */
-  --primary: oklch(0.7 0.16 25);
-  --primary-foreground: oklch(0.16 0.005 270);
+  /* brand accent — ONE muted burgundy/wine, used with discipline.
+     (#9f3d4f) Medium depth, moderate chroma: not pink-coral, not neon, not too dark.
+     primary-foreground is near-white so text stays readable on the darker accent. */
+  --primary: oklch(0.5 0.13 12);
+  --primary-foreground: oklch(0.97 0.01 20);
 
   /* feedback */
   --destructive: oklch(0.7 0.19 22);
@@ -88,7 +90,7 @@
   --radius: 0.625rem;
 
   /* charts — placeholders for v2 stats; on-theme spread */
-  --chart-1: oklch(0.7 0.16 25);
+  --chart-1: oklch(0.5 0.13 12);
   --chart-2: oklch(0.68 0.12 200);
   --chart-3: oklch(0.7 0.13 145);
   --chart-4: oklch(0.74 0.14 85);
@@ -97,8 +99,8 @@
   /* sidebar — unused in v1, kept consistent for shadcn primitives */
   --sidebar: oklch(0.185 0.006 270);
   --sidebar-foreground: oklch(0.95 0.005 270);
-  --sidebar-primary: oklch(0.7 0.16 25);
-  --sidebar-primary-foreground: oklch(0.16 0.005 270);
+  --sidebar-primary: oklch(0.5 0.13 12);
+  --sidebar-primary-foreground: oklch(0.97 0.01 20);
   --sidebar-accent: oklch(0.26 0.006 270);
   --sidebar-accent-foreground: oklch(0.95 0.005 270);
   --sidebar-border: oklch(1 0 0 / 10%);

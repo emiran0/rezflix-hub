@@ -33,8 +33,8 @@ Indicative palette — tune for the REZFLIX feel, keep contrast AA+:
   --foreground:        oklch(0.95 0.005 270);
   --muted-foreground:  oklch(0.72 0.01 270);
   /* accent — pick ONE brand accent and stay disciplined */
-  --primary:           oklch(0.70 0.16 25);    /* example: warm red-orange; adjust to brand */
-  --primary-foreground:oklch(0.16 0.005 270);
+  --primary:           oklch(0.50 0.13 12);    /* muted burgundy/wine (#9f3d4f) */
+  --primary-foreground:oklch(0.97 0.01 20);    /* near-white: readable text on the accent */
   --accent:            oklch(0.26 0.006 270);
   --accent-foreground: oklch(0.95 0.005 270);
   /* feedback */
