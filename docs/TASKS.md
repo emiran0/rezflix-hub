@@ -79,8 +79,16 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       `avatar`, timestamps). `prisma validate` passes; `prisma migrate status` = up to date, no drift.
       **No schema change / no new migration needed.** (No Account/Session/VerificationToken tables —
       Credentials+JWT without the Prisma adapter doesn't use them.)
-- [ ] **2.2** Signup (username + email + password). Zod validation; unique username/email
+- [x] **2.2** Signup (username + email + password). Zod validation; unique username/email
       errors. Hash the password (argon2id/bcrypt). New user = role `applicant`.
+      _Done:_ `/signup` page + `SignupForm` (shadcn Form + RHF + zod resolver). Shared `signupSchema`
+      (`lib/validations/auth.ts`) normalizes username/email (trim+lowercase) and caps password at 72
+      (bcrypt limit); login `authorize` now lowercases to match. Server action (`app/(auth)/signup/actions.ts`)
+      re-validates server-side, hashes via `lib/password.ts` (bcryptjs), creates the user (defaults
+      `applicant`/`none`), maps Prisma **P2002** to a specific field error ("username taken" / "email
+      already registered"), then auto-signs-in and redirects home (PRD §5.1). Signed-in users are
+      redirected off `/signup`. Verified end-to-end against the live DB (create→session→redirect, and
+      the duplicate-email error path). Unit tests cover the schema. Rate-limiting is task 2.6.
 - [ ] **2.3** Login (**username + password**) via Auth.js Credentials + logout. httpOnly JWT
       session cookie; generic failure message. Auth-aware nav.
 - [ ] **2.4** Route protection: server-side session checks; role/status gating

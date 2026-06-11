@@ -1,9 +1,9 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
-import type { Role } from "@prisma/client"
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import type { Role } from "@prisma/client";
 
-import { prisma } from "@/lib/prisma"
-import { verifyPassword } from "@/lib/password"
+import { prisma } from "@/lib/prisma";
+import { verifyPassword } from "@/lib/password";
 
 // Auth.js v5 (NextAuth). Identity is Hub-owned: login is always username + password
 // against our own `User` table (see docs/ARCHITECTURE.md §5).
@@ -31,16 +31,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       // lands in task 2.3; here we just guard against empty input.
       authorize: async (credentials) => {
         const username =
-          typeof credentials?.username === "string" ? credentials.username.trim() : ""
+          typeof credentials?.username === "string"
+            ? credentials.username.trim().toLowerCase()
+            : "";
         const password =
-          typeof credentials?.password === "string" ? credentials.password : ""
-        if (!username || !password) return null
+          typeof credentials?.password === "string" ? credentials.password : "";
+        if (!username || !password) return null;
 
-        const user = await prisma.user.findUnique({ where: { username } })
-        if (!user) return null
+        const user = await prisma.user.findUnique({ where: { username } });
+        if (!user) return null;
 
-        const ok = await verifyPassword(password, user.passwordHash)
-        if (!ok) return null
+        const ok = await verifyPassword(password, user.passwordHash);
+        if (!ok) return null;
 
         // Minimal principal — only what the token/session need. Never the passwordHash.
         return {
@@ -49,7 +51,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: user.email,
           name: user.displayName ?? user.username,
           role: user.role,
-        }
+        };
       },
     }),
   ],
@@ -58,19 +60,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     // Server Components can authorize without another DB round-trip.
     jwt: ({ token, user }) => {
       if (user) {
-        token.id = user.id as string
-        token.username = (user as { username: string }).username
-        token.role = (user as { role: Role }).role
+        token.id = user.id as string;
+        token.username = (user as { username: string }).username;
+        token.role = (user as { role: Role }).role;
       }
-      return token
+      return token;
     },
     session: ({ session, token }) => {
       if (session.user) {
-        session.user.id = token.id
-        session.user.username = token.username
-        session.user.role = token.role
+        session.user.id = token.id;
+        session.user.username = token.username;
+        session.user.role = token.role;
       }
-      return session
+      return session;
     },
   },
-})
+});
