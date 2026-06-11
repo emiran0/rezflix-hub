@@ -1,0 +1,118 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+ * REZFLIX Hub — DARK ONLY. Tokens per docs/DESIGN-SYSTEM.md.
+ * No light theme, no toggle: the dark palette lives in :root (so it cascades
+ * everywhere) and <html> carries `class="dark"` so shadcn `dark:` variants
+ * resolve. Components must consume these tokens — never hardcode hex/oklch.
+ */
+:root {
+  color-scheme: dark;
+
+  /* surfaces (background → card/popover → muted/secondary/accent) */
+  --background: oklch(0.16 0.005 270);
+  --card: oklch(0.205 0.006 270);
+  --popover: oklch(0.205 0.006 270);
+  --muted: oklch(0.26 0.006 270);
+  --secondary: oklch(0.26 0.006 270);
+  --accent: oklch(0.26 0.006 270);
+
+  /* text */
+  --foreground: oklch(0.95 0.005 270);
+  --card-foreground: oklch(0.95 0.005 270);
+  --popover-foreground: oklch(0.95 0.005 270);
+  --muted-foreground: oklch(0.72 0.01 270);
+  --secondary-foreground: oklch(0.95 0.005 270);
+  --accent-foreground: oklch(0.95 0.005 270);
+
+  /* brand accent — ONE warm red-orange, used with discipline */
+  --primary: oklch(0.7 0.16 25);
+  --primary-foreground: oklch(0.16 0.005 270);
+
+  /* feedback */
+  --destructive: oklch(0.7 0.19 22);
+
+  /* lines & focus */
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.55 0.02 270);
+
+  --radius: 0.625rem;
+
+  /* charts — placeholders for v2 stats; on-theme spread */
+  --chart-1: oklch(0.7 0.16 25);
+  --chart-2: oklch(0.68 0.12 200);
+  --chart-3: oklch(0.7 0.13 145);
+  --chart-4: oklch(0.74 0.14 85);
+  --chart-5: oklch(0.66 0.15 320);
+
+  /* sidebar — unused in v1, kept consistent for shadcn primitives */
+  --sidebar: oklch(0.185 0.006 270);
+  --sidebar-foreground: oklch(0.95 0.005 270);
+  --sidebar-primary: oklch(0.7 0.16 25);
+  --sidebar-primary-foreground: oklch(0.16 0.005 270);
+  --sidebar-accent: oklch(0.26 0.006 270);
+  --sidebar-accent-foreground: oklch(0.95 0.005 270);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.55 0.02 270);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

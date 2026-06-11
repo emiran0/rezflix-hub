@@ -1,0 +1,45 @@
+# Production stack for the VPS (app + database).
+#   docker compose -f infra/docker-compose.prod.yml up -d --build
+# rezlab-relay (Caddy) sits in FRONT of this and reverse-proxies www.rezflixtv.com to
+# the `hub` service (see infra/Caddyfile.snippet). Secrets come from a real .env file.
+
+services:
+  hub:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    container_name: rezflix-hub
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      NODE_ENV: production
+    # Exposed on the host loopback so only rezlab-relay (same host) can reach it.
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      hub-db:
+        condition: service_healthy
+
+  hub-db:
+    image: postgres:17-alpine
+    container_name: rezflix-hub-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rezflix}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-rezflix_hub}
+    volumes:
+      - hub-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rezflix} -d ${POSTGRES_DB:-rezflix_hub}"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  hub-db-data:
+# Note: in production set DATABASE_URL in .env to point at the hub-db service, e.g.
+#   postgresql://rezflix:<password>@hub-db:5432/rezflix_hub?schema=public
+# Run migrations on release:  npx prisma migrate deploy  (inside the hub container or CI).
+# Back up the hub-db-data volume regularly.

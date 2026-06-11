@@ -1,0 +1,36 @@
+# Local development database for the REZFLIX Hub.
+#   docker compose -f infra/docker-compose.dev.yml up -d
+# The app itself runs on the host via `npm run dev` during development. 
+
+services:
+  hub-db:
+    image: postgres:17-alpine
+    container_name: rezflix-hub-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: rezflix
+      POSTGRES_PASSWORD: rezflix          # dev only — prod uses a real secret via .env
+      POSTGRES_DB: rezflix_hub
+    ports:
+      - "5432:5432"
+    volumes:
+      - hub-db-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rezflix -d rezflix_hub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional lightweight DB browser at http://localhost:8085
+  adminer:
+    image: adminer:latest
+    container_name: rezflix-hub-adminer
+    restart: unless-stopped
+    ports:
+      - "8085:8080"
+    depends_on:
+      hub-db:
+        condition: service_healthy
+
+volumes:
+  hub-db-dev-data:

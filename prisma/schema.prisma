@@ -1,0 +1,51 @@
+// REZFLIX Hub — Prisma schema.
+// The Hub owns identity (username/password). Auth.js reads this `User` table via the
+// Prisma adapter; because we use the Credentials provider with JWT sessions there is no
+// `Session` table (the session lives in a signed httpOnly cookie). See docs/ARCHITECTURE.md §4–5.
+//
+// Schema changes: always `prisma migrate dev` (local) / `migrate deploy` (prod). Never `db push`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// A Hub user. `member` is defined by a non-null `jellyfinUserId` (linking Jellyfin = membership);
+// `admin` is derived at sign-in from the ADMIN_EMAILS env var and persisted to `role`.
+model User {
+  id           String @id @default(cuid())
+  username     String @unique
+  email        String @unique
+  passwordHash String
+  displayName  String?
+
+  role              Role              @default(applicant)
+  applicationStatus ApplicationStatus @default(none)
+
+  // Jellyfin link (proof-of-ownership). The Jellyfin password is never stored.
+  // Unique so one Jellyfin account maps to at most one Hub user.
+  jellyfinUserId   String?   @unique
+  jellyfinLinkedAt DateTime?
+
+  avatar String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  applicant
+  member
+  admin
+}
+
+enum ApplicationStatus {
+  none
+  pending
+  approved
+  rejected
+}

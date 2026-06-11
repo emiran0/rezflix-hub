@@ -1,0 +1,37 @@
+# Build context excludes for infra/Dockerfile (context = repo root).
+# Keep: package.json, package-lock.json, app/, public/, prisma/, *.config.*, tsconfig.json.
+
+# VCS
+.git
+.gitignore
+.gitattributes
+
+# Dependencies & build output (reinstalled/rebuilt inside the image)
+node_modules
+.next
+out
+build
+dist
+
+# Secrets / env — must never be copied into any image layer
+.env
+.env.*
+
+# Dev/docs tooling — not needed in the production image
+.nvmrc
+docs
+infra
+README.md
+
+# Test & tooling artifacts
+coverage
+test-results
+playwright-report
+playwright/.cache
+*.tsbuildinfo
+*.log
+
+# Editor / OS
+.DS_Store
+.vscode
+.idea

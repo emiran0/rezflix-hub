@@ -1,0 +1,23 @@
+# Add this block to the rezlab-relay Caddyfile on the VPS.
+# Caddy handles TLS automatically. The hub container listens on 127.0.0.1:3000
+# (see infra/docker-compose.prod.yml), so only the relay on the same host can reach it.
+
+www.rezflixtv.com {
+	encode zstd gzip
+
+	# Sensible baseline security headers (normal level — adjust CSP as the app firms up).
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "SAMEORIGIN"
+		-Server
+	}
+
+	reverse_proxy 127.0.0.1:3000
+}
+
+# Optional: send the apex to www (or vice-versa) — pick one canonical host.
+# rezflixtv.com {
+# 	redir https://www.rezflixtv.com{uri} permanent
+# }
