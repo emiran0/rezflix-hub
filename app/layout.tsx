@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -18,6 +18,16 @@ export const metadata: Metadata = {
   description: "The single entry point for the REZFLIX media service.",
 };
 
+// Dark-only: tell the browser (and mobile UI chrome) we're a dark surface so the mobile
+// address bar matches the app, not a white flash. theme-color can't consume oklch, so this
+// is the sRGB of --background (oklch(0.16 0.005 270) -> #0c0d0f); re-derive if that token moves.
+export const viewport: Viewport = {
+  colorScheme: "dark",
+  themeColor: "#0c0d0f",
+  width: "device-width",
+  initialScale: 1,
+};
+
 // Dark-only app: `dark` is hardcoded on <html>; there is no theme toggle.
 export default function RootLayout({
   children,
@@ -27,9 +37,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`dark ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-svh flex flex-col">
         {children}
         {/* Dark-only app: pin Sonner to the dark theme (no next-themes here). */}
         <Toaster theme="dark" position="top-center" richColors />

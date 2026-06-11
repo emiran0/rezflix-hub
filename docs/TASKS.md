@@ -41,7 +41,11 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
   (`dev/build/start/lint/test/test:e2e`), basic README in-repo.
 
 ## Phase 1 — App shell & design system
-- [ ] **1.1** Root layout: dark theme applied globally, font loaded, base background/foreground.
+- [x] **1.1** Root layout: dark theme applied globally, font loaded, base background/foreground.
+  _Done:_ mostly satisfied by the 0.2 scaffold (`:root` dark tokens + `color-scheme: dark`,
+  `<html class="dark">`, Geist via `next/font`, `@layer base` `body { bg-background text-foreground }`).
+  Added a `viewport` export (`colorScheme: "dark"` + `themeColor` ≈ `--background`) so mobile
+  browser chrome is dark, and switched the body to `min-h-svh` for correct mobile viewport height.
 - [ ] **1.2** Responsive nav/top bar (collapses to a sheet on mobile) + footer. Thumb-reachable.
 - [ ] **1.3** Shared UI building blocks wired to tokens (page container, section, card grid).
 - [ ] **1.4** Motion primitives: a reusable entrance animation + page/route transition,
