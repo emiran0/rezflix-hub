@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { applicationSchema } from "@/lib/validations/application";
+import {
+  applicationSchema,
+  isResubmittable,
+} from "@/lib/validations/application";
 
 const valid = {
   displayName: "Rez Fan",
@@ -48,5 +51,14 @@ describe("applicationSchema", () => {
     const { note: _omit, ...withoutNote } = valid;
     void _omit;
     expect(applicationSchema.safeParse(withoutNote).success).toBe(true);
+  });
+});
+
+describe("isResubmittable", () => {
+  it("allows editing from pending and rejected, not approved", () => {
+    expect(isResubmittable("pending")).toBe(true);
+    expect(isResubmittable("rejected")).toBe(true);
+    expect(isResubmittable("approved")).toBe(false);
+    expect(isResubmittable("none")).toBe(false);
   });
 });

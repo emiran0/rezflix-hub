@@ -202,12 +202,22 @@ jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"
       (answers stored as `Application.answers` Json). `ApplicationForm` (shadcn Form + RHF + zod) calls
       the `submitApplication` server action (`app/apply/actions.ts`): re-validates, then **upserts** the
       `Application` (create or resubmit → `pending`, clears prior review) and sets `User.applicationStatus
-    = pending` in **one `$transaction`**; non-applicants blocked server-side too. On submit the page
+  = pending` in **one `$transaction`**; non-applicants blocked server-side too. On submit the page
       swaps to a **status view** (pending/approved/rejected copy + submitted date). Added dependency-free
       `components/ui/textarea.tsx` + a native `<select>`/checkbox styled with tokens (no new Radix deps).
       Unit tests: schema (5) + action (3: success/atomic, non-applicant blocked, invalid input no-write).
       `/apply` verified to 307 → `/login` when signed out. (Edit/resubmit UX + admin review are 4.3/4.4.)
-- [ ] **4.3** Applicant status view (pending/approved/rejected); allow edit/resubmit per PRD.
+- [x] **4.3** Applicant status view (pending/approved/rejected); allow edit/resubmit per PRD.
+      _Done:_ `ApplicationStatus` (client) renders status-specific copy + a "Submitted on" line and,
+      when allowed, an **edit/resubmit** affordance that reveals the questionnaire **prefilled** with the
+      stored answers (`ApplicationForm` gained `initialValues` / `submitLabel` / `onCancel`; consent is
+      never pre-ticked — the applicant re-affirms the house rules each submit). **Configurable** policy
+      via `RESUBMITTABLE_STATUSES = [pending, rejected]` + `isResubmittable()` (PRD §5.3 — "resubmission
+      allowed if rejected"); **approved is locked**. The `submitApplication` action now re-reads the
+      existing row and **refuses to edit once approved** (defense in depth; the page also hides the form).
+      Resubmit reuses the 4.2 upsert (→ `pending`, clears prior review). Unit tests added: `isResubmittable`
+      (1) + action resubmit-from-rejected and approved-locked (2). `/apply` re-verified 307 → `/login`
+      and compiles. (Admin approve/reject that sets these statuses is 4.4.)
 - [ ] **4.4** Admin-only review list with approve/reject; approve flips role to member.
 
 ## Phase 5 — Profile

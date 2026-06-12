@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ApplicationStatus } from "@prisma/client";
 
 // The join questionnaire (PRD §5.3). Kept schema-driven: the questions live here and the
 // answers are stored as a single JSON blob on `Application.answers`, so adding/removing a
@@ -51,3 +52,12 @@ export const applicationSchema = z.object({
 
 export type ApplicationInput = z.input<typeof applicationSchema>;
 export type ApplicationValues = z.output<typeof applicationSchema>;
+
+// Which application statuses an applicant may still edit/resubmit from (PRD §5.3 —
+// "re-submission allowed if rejected", configurable). `approved` is locked (you're in —
+// don't reset yourself to pending); `none` just means no application yet (blank form).
+export const RESUBMITTABLE_STATUSES = ["pending", "rejected"] as const;
+
+export function isResubmittable(status: ApplicationStatus): boolean {
+  return (RESUBMITTABLE_STATUSES as readonly string[]).includes(status);
+}

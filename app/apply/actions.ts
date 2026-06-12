@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import {
   applicationSchema,
+  isResubmittable,
   type ApplicationInput,
 } from "@/lib/validations/application";
 
@@ -29,6 +30,17 @@ export async function submitApplication(
   const parsed = applicationSchema.safeParse(values);
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Invalid input" };
+  }
+
+  // A first submission (no row yet) is always allowed; an existing one can only be
+  // edited/resubmitted from a resubmittable status (not once approved). Defense in depth —
+  // the page already hides the form when locked.
+  const existing = await prisma.application.findUnique({
+    where: { userId: sessionUser.id },
+    select: { status: true },
+  });
+  if (existing && !isResubmittable(existing.status)) {
+    return { error: "Your application can no longer be edited." };
   }
 
   const answers = parsed.data as unknown as Prisma.InputJsonObject;

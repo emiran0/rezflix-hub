@@ -8,11 +8,15 @@ vi.mock("@/lib/auth-guards", () => ({
 }));
 
 const upsert = vi.fn();
+const findUnique = vi.fn();
 const update = vi.fn();
 const $transaction = vi.fn();
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    application: { upsert: (a: unknown) => upsert(a) },
+    application: {
+      upsert: (a: unknown) => upsert(a),
+      findUnique: (a: unknown) => findUnique(a),
+    },
     user: { update: (a: unknown) => update(a) },
     $transaction: (a: unknown) => $transaction(a),
   },
@@ -34,6 +38,7 @@ const answers = {
 
 beforeEach(() => {
   requireUserMock.mockResolvedValue({ id: "u1", role: "applicant" });
+  findUnique.mockResolvedValue(null); // no existing application by default
   $transaction.mockResolvedValue([{}, {}]);
 });
 
@@ -73,6 +78,20 @@ describe("submitApplication", () => {
   it("rejects invalid input before any write", async () => {
     const result = await submitApplication({ ...answers, agreeToRules: false });
     expect("error" in result && result.error).toMatch(/house rules/i);
+    expect($transaction).not.toHaveBeenCalled();
+  });
+
+  it("allows resubmit from a rejected application", async () => {
+    findUnique.mockResolvedValue({ status: "rejected" });
+    const result = await submitApplication(answers);
+    expect(result).toEqual({ success: true });
+    expect($transaction).toHaveBeenCalledTimes(1);
+  });
+
+  it("blocks editing once approved", async () => {
+    findUnique.mockResolvedValue({ status: "approved" });
+    const result = await submitApplication(answers);
+    expect("error" in result && result.error).toMatch(/no longer be edited/i);
     expect($transaction).not.toHaveBeenCalled();
   });
 });

@@ -25,7 +25,16 @@ import {
 } from "@/lib/validations/application";
 import { submitApplication } from "@/app/apply/actions";
 
-export function ApplicationForm() {
+export function ApplicationForm({
+  initialValues,
+  submitLabel = "Submit application",
+  onCancel,
+}: {
+  /** Prefill for edit/resubmit (PRD §5.3). Omitted for a first application. */
+  initialValues?: Partial<ApplicationInput>;
+  submitLabel?: string;
+  onCancel?: () => void;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
@@ -38,8 +47,10 @@ export function ApplicationForm() {
       referralSource: undefined,
       watchInterests: "",
       devices: "",
-      agreeToRules: false,
       note: "",
+      ...initialValues,
+      // Always re-affirm consent on edit — never pre-tick the house-rules box from stored answers.
+      agreeToRules: false,
     },
   });
 
@@ -210,9 +221,26 @@ export function ApplicationForm() {
           <p className="text-destructive text-sm">{formError}</p>
         ) : null}
 
-        <Button type="submit" className="h-11 w-full" disabled={isPending}>
-          {isPending ? "Submitting…" : "Submit application"}
-        </Button>
+        <div className="flex flex-col gap-3 sm:flex-row-reverse">
+          <Button
+            type="submit"
+            className="h-11 w-full sm:flex-1"
+            disabled={isPending}
+          >
+            {isPending ? "Submitting…" : submitLabel}
+          </Button>
+          {onCancel ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-11 w-full sm:w-auto"
+              onClick={onCancel}
+              disabled={isPending}
+            >
+              Cancel
+            </Button>
+          ) : null}
+        </div>
       </form>
     </Form>
   );
