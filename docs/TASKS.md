@@ -124,7 +124,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       itself isn't unit-tested (NextAuth-internal, not worth mocking). `ADMIN_EMAILS` already in `.env.example`.
 - [x] **2.6** Basic rate-limiting on signup + login.
       _Done:_ `lib/rate-limit.ts` — a process-local in-memory fixed-window limiter (`rateLimit(key,
-  {limit, windowMs})`) + `clientIp()`. To stay spoof-resistant, `clientIp()` keys off `x-real-ip`
+{limit, windowMs})`) + `clientIp()`. To stay spoof-resistant, `clientIp()` keys off `x-real-ip`
       (set by Caddy to the real TCP peer via `header_up X-Real-IP {remote_host}` — added to the
       `Caddyfile.snippet`), then the **rightmost** `x-forwarded-for` hop (Caddy appends the real peer;
       the leftmost is attacker-supplied), then `"local"` in dev. Both the signup and login server actions throttle **5 attempts /
@@ -142,16 +142,29 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       returns `{ authenticateByName(username, password) }` which POSTs to `…/Users/AuthenticateByName`
       with the `X-Emby-Authorization` header (no plugin, **no admin/API token**; the returned AccessToken
       is ignored, never stored). Result is a discriminated union — `{ ok:true, jellyfinUserId,
-    jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"unexpected" }` —
+  jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"unexpected" }` —
       so 3.2/3.3 can map errors without try/catch. 401 → invalid_credentials; network error / `AbortController`
       timeout (default 8s) → unreachable; other non-2xx or missing `User.Id` → unexpected. Password is sent
       once in the body and **never logged** (the catch swallows the cause, which can reference the request).
       `getJellyfinClient()` builds the default from env (lazy; throws clearly if `JELLYFIN_INTERNAL_URL`
       unset). Stubbable via injected `fetchImpl`; 9 unit tests cover success/req-shape, no-password-leak,
       and every failure branch. The actual link flow + DB writes are 3.2; rate-limiting the endpoint is 3.3.
-- [ ] **3.2** "Link Jellyfin Account" flow (signed-in only): verify Jellyfin creds → store
+- [x] **3.2** "Link Jellyfin Account" flow (signed-in only): verify Jellyfin creds → store
       `jellyfinUserId` + `jellyfinLinkedAt` on the **current** user → role member. Never store the
       Jellyfin password. Enforce `jellyfinUserId` uniqueness (one Jellyfin account ↔ one Hub user).
+      _Done:_ New `/profile` page (`requireUser`, signed-in only) — **front-loads the host for 5.1**:
+      account summary (username/email/role) + a "Jellyfin account" card that shows the link form when
+      unlinked or a Linked/linked-on status when linked. `LinkJellyfinForm` (shadcn Form + RHF + zod,
+      two fields: Jellyfin username + password) calls the `linkJellyfin` server action
+      (`app/profile/actions.ts`): re-auths via `getJellyfinClient().authenticateByName`, and on success
+      stores `jellyfinUserId` + `jellyfinLinkedAt` and promotes the role. **Admins keep `admin`**
+      (non-admins → `member`) — never self-demote. Uniqueness enforced via the DB constraint → P2002
+      mapped to "already linked to another Hub account"; a current-user re-link is short-circuited.
+      Jellyfin password is sent once and never stored. Error reasons (invalid/unreachable/unexpected)
+      mapped to friendly copy (3.3 refines + adds rate-limiting). Auth-aware nav gained a **Profile**
+      link (desktop + mobile). Unit tests: link schema (3) + action (6: success/member, admin-kept,
+      bad input, already-linked, invalid creds no-write, P2002). `/profile` verified to 307 → `/login`
+      when signed out.
 - [ ] **3.3** Handle edge cases: wrong Jellyfin creds, Jellyfin unreachable, that Jellyfin
       account already linked to another Hub user. Clear, specific errors. Rate-limit the endpoint.
 - [ ] **3.4** Tests: link success, wrong creds, unreachable, already-linked (mocked Jellyfin).

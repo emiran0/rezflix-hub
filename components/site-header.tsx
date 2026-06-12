@@ -30,6 +30,9 @@ export async function SiteHeader() {
           ))}
           {user ? (
             <>
+              <Button variant="ghost" asChild>
+                <Link href="/profile">Profile</Link>
+              </Button>
               <span className="text-muted-foreground ml-2 text-sm">
                 {user.username}
               </span>

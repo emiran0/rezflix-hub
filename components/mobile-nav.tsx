@@ -61,8 +61,16 @@ export function MobileNav({
             </SheetClose>
           ))}
           {user ? (
-            <div className="mt-3 flex flex-col gap-2">
-              <span className="text-muted-foreground px-3 text-sm">
+            <div className="mt-1 flex flex-col gap-2">
+              <SheetClose asChild>
+                <Link
+                  href="/profile"
+                  className="rounded-md px-3 py-3 text-base hover:bg-accent hover:text-accent-foreground"
+                >
+                  Profile
+                </Link>
+              </SheetClose>
+              <span className="text-muted-foreground px-3 pt-2 text-sm">
                 Signed in as {user.username}
               </span>
               {/* Submitting the logout form redirects, which unmounts the sheet. */}
