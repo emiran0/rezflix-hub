@@ -28,13 +28,21 @@ vi.mock("@/lib/jellyfin", () => ({
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
+// The action imports lib/rate-limit, which imports next/headers at module load.
+vi.mock("next/headers", () => ({ headers: vi.fn() }));
+
 import { linkJellyfin } from "@/app/profile/actions";
 
 const creds = { jellyfinUsername: "rezfan", jellyfinPassword: "s3cret" };
 
+// The rate limiter keys off the user id and keeps process-global state across tests, so
+// give every test a fresh id — otherwise one test's calls eat another's budget.
+let userSeq = 0;
+
 beforeEach(() => {
+  userSeq += 1;
   requireUserMock.mockResolvedValue({
-    id: "u1",
+    id: `u${userSeq}`,
     username: "rez",
     email: "rez@x.co",
     role: "applicant",
@@ -110,6 +118,14 @@ describe("linkJellyfin", () => {
     expect(update).not.toHaveBeenCalled();
   });
 
+  it("surfaces a clear message when Jellyfin is unreachable and does not write", async () => {
+    findUnique.mockResolvedValue({ role: "applicant", jellyfinUserId: null });
+    authenticateByName.mockResolvedValue({ ok: false, reason: "unreachable" });
+    const result = await linkJellyfin(creds);
+    expect("error" in result && result.error).toMatch(/can't reach jellyfin/i);
+    expect(update).not.toHaveBeenCalled();
+  });
+
   it("maps a unique-constraint violation to already-linked-elsewhere", async () => {
     findUnique.mockResolvedValue({ role: "applicant", jellyfinUserId: null });
     authenticateByName.mockResolvedValue({
@@ -128,5 +144,25 @@ describe("linkJellyfin", () => {
     expect(result).toEqual({
       error: "That Jellyfin account is already linked to another Hub account.",
     });
+  });
+
+  it("throttles after too many attempts for the same account", async () => {
+    // Make every attempt a clean invalid-creds failure so nothing links; we're only
+    // exercising the per-account rate limit (5/min).
+    findUnique.mockResolvedValue({ role: "applicant", jellyfinUserId: null });
+    authenticateByName.mockResolvedValue({
+      ok: false,
+      reason: "invalid_credentials",
+    });
+
+    for (let i = 0; i < 5; i++) {
+      const r = await linkJellyfin(creds);
+      expect("error" in r && r.error).toMatch(/credentials didn't work/i);
+    }
+
+    const blocked = await linkJellyfin(creds);
+    expect("error" in blocked && blocked.error).toMatch(/too many attempts/i);
+    // Once throttled, we don't even hit Jellyfin again.
+    expect(authenticateByName).toHaveBeenCalledTimes(5);
   });
 });

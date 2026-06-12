@@ -142,7 +142,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       returns `{ authenticateByName(username, password) }` which POSTs to `…/Users/AuthenticateByName`
       with the `X-Emby-Authorization` header (no plugin, **no admin/API token**; the returned AccessToken
       is ignored, never stored). Result is a discriminated union — `{ ok:true, jellyfinUserId,
-  jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"unexpected" }` —
+jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"unexpected" }` —
       so 3.2/3.3 can map errors without try/catch. 401 → invalid_credentials; network error / `AbortController`
       timeout (default 8s) → unreachable; other non-2xx or missing `User.Id` → unexpected. Password is sent
       once in the body and **never logged** (the catch swallows the cause, which can reference the request).
@@ -165,8 +165,16 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       link (desktop + mobile). Unit tests: link schema (3) + action (6: success/member, admin-kept,
       bad input, already-linked, invalid creds no-write, P2002). `/profile` verified to 307 → `/login`
       when signed out.
-- [ ] **3.3** Handle edge cases: wrong Jellyfin creds, Jellyfin unreachable, that Jellyfin
+- [x] **3.3** Handle edge cases: wrong Jellyfin creds, Jellyfin unreachable, that Jellyfin
       account already linked to another Hub user. Clear, specific errors. Rate-limit the endpoint.
+      _Done:_ The distinct error copy landed with 3.2 (wrong creds / unreachable / unexpected from the
+      client union; P2002 → "already linked to another Hub account"; current-user re-link short-circuit).
+      This task adds **rate-limiting** to `linkJellyfin`: reuses `lib/rate-limit.ts` keyed **per Hub
+      account** (`link-jellyfin:${userId}` — it's an authenticated endpoint, so the account is the right
+      axis) at **5 attempts/min**, checked right after `requireUser` and before any Jellyfin call, to
+      blunt Jellyfin password guessing. Over-limit returns "Too many attempts. Try again in Ns." Added
+      action tests for the **unreachable** path and the **throttle** (5 ok → 6th blocked, no further
+      Jellyfin call).
 - [ ] **3.4** Tests: link success, wrong creds, unreachable, already-linked (mocked Jellyfin).
 
 ## Phase 4 — Application / questionnaire

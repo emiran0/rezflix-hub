@@ -6,6 +6,7 @@ import { Prisma } from "@prisma/client";
 import { requireUser } from "@/lib/auth-guards";
 import { prisma } from "@/lib/prisma";
 import { getJellyfinClient } from "@/lib/jellyfin";
+import { rateLimit } from "@/lib/rate-limit";
 import {
   linkJellyfinSchema,
   type LinkJellyfinInput,
@@ -13,7 +14,7 @@ import {
 
 export type LinkJellyfinResult = { error: string } | { success: true };
 
-// Map the low-level client outcomes to user-facing copy. Refined further in task 3.3.
+// Map the low-level client outcomes to user-facing copy.
 const REASON_MESSAGE: Record<string, string> = {
   invalid_credentials:
     "Those Jellyfin credentials didn't work. Check your username and password.",
@@ -22,14 +23,25 @@ const REASON_MESSAGE: Record<string, string> = {
     "Something went wrong verifying your Jellyfin account. Please try again.",
 };
 
+// This endpoint drives a Jellyfin password check, so throttle it to blunt password
+// guessing — keyed per Hub account (it's authenticated, so the account is the right axis).
+const LINK_RATE_LIMIT = { limit: 5, windowMs: 60_000 };
+
 // Link the **current** signed-in Hub user to a Jellyfin account (ARCHITECTURE §5.3): verify
 // the Jellyfin credentials as proof of ownership, then store `jellyfinUserId` +
 // `jellyfinLinkedAt` and become a `member`. The Jellyfin password is never stored. This is
-// the only path to `member`. Endpoint rate-limiting + edge-case polish land in task 3.3.
+// the only path to `member`.
 export async function linkJellyfin(
   values: LinkJellyfinInput,
 ): Promise<LinkJellyfinResult> {
   const sessionUser = await requireUser();
+
+  const rl = rateLimit(`link-jellyfin:${sessionUser.id}`, LINK_RATE_LIMIT);
+  if (!rl.success) {
+    return {
+      error: `Too many attempts. Try again in ${rl.retryAfterSeconds}s.`,
+    };
+  }
 
   const parsed = linkJellyfinSchema.safeParse(values);
   if (!parsed.success) {
