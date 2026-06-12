@@ -7,6 +7,7 @@ import { signIn } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { signupSchema, type SignupInput } from "@/lib/validations/auth";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 export type SignupResult = {
   error: string;
@@ -19,6 +20,17 @@ export type SignupResult = {
 export async function signup(
   values: SignupInput,
 ): Promise<SignupResult | void> {
+  // Throttle signup spam: 5 attempts / minute per IP, before any DB work.
+  const rl = rateLimit(`signup:${await clientIp()}`, {
+    limit: 5,
+    windowMs: 60_000,
+  });
+  if (!rl.success) {
+    return {
+      error: `Too many attempts. Try again in ${rl.retryAfterSeconds}s.`,
+    };
+  }
+
   const parsed = signupSchema.safeParse(values);
   if (!parsed.success) {
     const issue = parsed.error.issues[0];

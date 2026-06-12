@@ -122,7 +122,17 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       the role actually changes. Runs on both login and signup's auto-sign-in. Unit tests cover the
       allowlist parsing (match, case/space tolerance, empty entries); the `authorize` promotion wiring
       itself isn't unit-tested (NextAuth-internal, not worth mocking). `ADMIN_EMAILS` already in `.env.example`.
-- [ ] **2.6** Basic rate-limiting on signup + login.
+- [x] **2.6** Basic rate-limiting on signup + login.
+      _Done:_ `lib/rate-limit.ts` — a process-local in-memory fixed-window limiter (`rateLimit(key,
+    {limit, windowMs})`) + `clientIp()`. To stay spoof-resistant, `clientIp()` keys off `x-real-ip`
+      (set by Caddy to the real TCP peer via `header_up X-Real-IP {remote_host}` — added to the
+      `Caddyfile.snippet`), then the **rightmost** `x-forwarded-for` hop (Caddy appends the real peer;
+      the leftmost is attacker-supplied), then `"local"` in dev. Both the signup and login server actions throttle **5 attempts /
+      minute per IP** before any DB work, returning a friendly "Try again in Ns" message (login keeps
+      its generic-failure wording for actual auth). Opportunistic once-a-minute sweep drops expired
+      buckets (no timers/intervals). In-memory is acceptable for the single v1 container (resets on
+      restart, per ARCHITECTURE §7); Redis only if we scale out. Unit tests cover limit/block, window
+      reset, and per-key isolation. The Jellyfin link endpoint gets the same treatment in task 3.3.
 
 ## Phase 3 — Link Jellyfin Account (becoming a member)
 

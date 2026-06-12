@@ -14,7 +14,12 @@ www.rezflixtv.com {
 		-Server
 	}
 
-	reverse_proxy 127.0.0.1:3000
+	# X-Real-IP = the actual connecting peer ({remote_host}), set by us and not derived
+	# from any client-supplied header — the app keys its rate-limiter off this so a forged
+	# X-Forwarded-For can't be used to bypass it (see lib/rate-limit.ts clientIp()).
+	reverse_proxy 127.0.0.1:3000 {
+		header_up X-Real-IP {remote_host}
+	}
 }
 
 # Optional: send the apex to www (or vice-versa) — pick one canonical host.
