@@ -101,8 +101,18 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       Log out vs. Sign in; `MobileNav` takes `user` + a server-rendered `signOutSlot`. Signed-in users
       are redirected off `/login`. e2e `login.spec.ts` (desktop + Pixel-5): no horizontal scroll + empty-
       submit field errors; unit tests cover `loginSchema`. Rate-limiting is task 2.6; ADMIN_EMAILS is 2.5.
-- [ ] **2.4** Route protection: server-side session checks; role/status gating
+- [x] **2.4** Route protection: server-side session checks; role/status gating
       (guest vs applicant vs member vs admin).
+      _Done:_ `lib/auth-guards.ts` (server-only) exposes `requireUser` (→ `/login` if signed out),
+      `requireGuest` (→ `/` if signed in), `requireRole(...roles)` (signed-out → `/login`, wrong role
+      → `/`), and a `requireAdmin` wrapper — each decodes the Auth.js JWT via `auth()` and `redirect()`s
+      to halt. `SessionUser` is derived from the augmented `Session` (not `ReturnType<typeof auth>`,
+      which resolves `auth`'s middleware overload). `/login` + `/signup` now call `requireGuest()`
+      instead of the inline check. Roles map to PRD §3 personas (`member` = Jellyfin-linked, `admin`
+      from `ADMIN_EMAILS`). **No edge middleware (deliberate):** `authorize` pulls Prisma+bcrypt into
+      `auth.ts`, which can't run in the edge runtime, and per-segment server checks are the stronger
+      boundary — documented in ARCHITECTURE §6.1. Unit tests cover all four guards (both pass + redirect
+      branches). The guards get consumed as protected routes land (apply/profile/admin, Phases 4–5).
 - [ ] **2.5** Admin promotion: on sign-in, set role `admin` for emails in `ADMIN_EMAILS`.
 - [ ] **2.6** Basic rate-limiting on signup + login.
 

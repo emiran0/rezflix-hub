@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
-import { auth } from "@/auth";
+import { requireGuest } from "@/lib/auth-guards";
 import {
   Card,
   CardContent,
@@ -19,7 +18,7 @@ export const metadata: Metadata = {
 
 export default async function SignupPage() {
   // Already signed in? Nothing to do here.
-  if (await auth()) redirect("/");
+  await requireGuest();
 
   return (
     <main className="flex flex-1 items-center justify-center p-6">
