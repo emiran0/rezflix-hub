@@ -175,11 +175,24 @@ jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"
       blunt Jellyfin password guessing. Over-limit returns "Too many attempts. Try again in Ns." Added
       action tests for the **unreachable** path and the **throttle** (5 ok → 6th blocked, no further
       Jellyfin call).
-- [ ] **3.4** Tests: link success, wrong creds, unreachable, already-linked (mocked Jellyfin).
+- [x] **3.4** Tests: link success, wrong creds, unreachable, already-linked (mocked Jellyfin).
+      _Done:_ all four cases (plus admin-kept, bad input, current-user already-linked, P2002
+      already-linked-elsewhere, and the rate-limit throttle) are covered by `app/profile/actions.test.ts`
+      with a mocked Jellyfin client + Prisma, and the low-level client itself by `lib/jellyfin.test.ts`.
+      Also **live-verified over Tailscale** against the real Rezflix Jellyfin — a genuine member account
+      linked successfully end-to-end (owner test, 2026-06-12).
 
 ## Phase 4 — Application / questionnaire
 
-- [ ] **4.1** `application` model + migration (schema-driven answers).
+- [x] **4.1** `application` model + migration (schema-driven answers).
+      _Done:_ Added the `Application` model (`prisma/schema.prisma`) + migration
+      `add_application_model`: `id`, `userId` (unique FK → `User`, `onDelete: Cascade`), `answers`
+      **`Json`/jsonb** (schema-driven — questionnaire can evolve without a migration; the question set
+      lives in app code, 4.2), `status` (reuses the `ApplicationStatus` enum, default `pending`),
+      nullable `reviewedBy` (admin user id, plain string — no self-relation for v1) + `reviewedAt`,
+      `createdAt`/`updatedAt`. Indexes on `userId` (unique) and `status` per ARCHITECTURE §4. Back-relation
+      `application Application?` added to `User`. `prisma validate` + `migrate status` clean; client
+      regenerated, lint/types/53 tests green. (Approval still doesn't grant `member` — the Jellyfin link does.)
 - [ ] **4.2** Questionnaire form (shadcn Form + Zod), mobile-friendly, saves against the
       applicant. Shows submitted state + status.
 - [ ] **4.3** Applicant status view (pending/approved/rejected); allow edit/resubmit per PRD.
