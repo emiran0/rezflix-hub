@@ -200,6 +200,17 @@ jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"
 
 ## Phase 5 — Profile
 
+- [ ] **5.0** Profile schema fields (one additive migration; from `docs/BACKLOG.md`). Add the cheap,
+      low-risk columns now so later UI is non-blocking — **[design]/feature items stay in the backlog**
+      (uploads, public profiles, follow graph, points-engine, favorites picker). Add to `User`:
+      `bio String?` (public, ≤280, enforced in Zod), `points Int @default(0)` (system-set), `tier`
+      enum `@default(<lowest>)` (new `Tier` enum; system-set), `letterboxd`/`instagram`/`serializd`
+      `String?` (socials), `bannerImage String?` (URL/path; default look when null), `favorites Json?`
+      (≤4–5 picks), `jellyfinUsername String?`, and `birthday DateTime?`. Then: - **Persist `jellyfinUsername`** in `linkJellyfin` (`result.jellyfinUsername` — currently discarded)
+      so 5.1 can show the linked Rezflix username. - **Birthday at sign-up (≥16):** keep the column **nullable** but make it **required in the signup
+      Zod schema** + add an age-≥16 check (client + server) — enforces for new sign-ups without a
+      backfill (no real users yet). Touches the built 2.2 signup flow. - Index only if a query needs it (none yet). `points`/`tier` are written by system logic later
+      (largely v2); no earning engine in this task.
 - [ ] **5.1** Profile page: shows username, email, role/status, Jellyfin-link status; hosts the
       **Link Jellyfin Account** action (Phase 3) for unlinked users.
 - [ ] **5.2** Edit display name, password, optional avatar. Validated.
