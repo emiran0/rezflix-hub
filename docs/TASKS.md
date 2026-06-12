@@ -124,7 +124,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       itself isn't unit-tested (NextAuth-internal, not worth mocking). `ADMIN_EMAILS` already in `.env.example`.
 - [x] **2.6** Basic rate-limiting on signup + login.
       _Done:_ `lib/rate-limit.ts` — a process-local in-memory fixed-window limiter (`rateLimit(key,
-    {limit, windowMs})`) + `clientIp()`. To stay spoof-resistant, `clientIp()` keys off `x-real-ip`
+  {limit, windowMs})`) + `clientIp()`. To stay spoof-resistant, `clientIp()` keys off `x-real-ip`
       (set by Caddy to the real TCP peer via `header_up X-Real-IP {remote_host}` — added to the
       `Caddyfile.snippet`), then the **rightmost** `x-forwarded-for` hop (Caddy appends the real peer;
       the leftmost is attacker-supplied), then `"local"` in dev. Both the signup and login server actions throttle **5 attempts /
@@ -136,8 +136,19 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
 
 ## Phase 3 — Link Jellyfin Account (becoming a member)
 
-- [ ] **3.1** Server-side Jellyfin client: `AuthenticateByName` against `JELLYFIN_INTERNAL_URL`
+- [x] **3.1** Server-side Jellyfin client: `AuthenticateByName` against `JELLYFIN_INTERNAL_URL`
       (Tailnet), server-only, no plugin/admin token. Make it stubbable for local tests.
+      _Done:_ `lib/jellyfin.ts` — `createJellyfinClient({ baseUrl, clientName, fetchImpl?, timeoutMs? })`
+      returns `{ authenticateByName(username, password) }` which POSTs to `…/Users/AuthenticateByName`
+      with the `X-Emby-Authorization` header (no plugin, **no admin/API token**; the returned AccessToken
+      is ignored, never stored). Result is a discriminated union — `{ ok:true, jellyfinUserId,
+    jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"unexpected" }` —
+      so 3.2/3.3 can map errors without try/catch. 401 → invalid_credentials; network error / `AbortController`
+      timeout (default 8s) → unreachable; other non-2xx or missing `User.Id` → unexpected. Password is sent
+      once in the body and **never logged** (the catch swallows the cause, which can reference the request).
+      `getJellyfinClient()` builds the default from env (lazy; throws clearly if `JELLYFIN_INTERNAL_URL`
+      unset). Stubbable via injected `fetchImpl`; 9 unit tests cover success/req-shape, no-password-leak,
+      and every failure branch. The actual link flow + DB writes are 3.2; rate-limiting the endpoint is 3.3.
 - [ ] **3.2** "Link Jellyfin Account" flow (signed-in only): verify Jellyfin creds → store
       `jellyfinUserId` + `jellyfinLinkedAt` on the **current** user → role member. Never store the
       Jellyfin password. Enforce `jellyfinUserId` uniqueness (one Jellyfin account ↔ one Hub user).
