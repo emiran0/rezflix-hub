@@ -193,8 +193,20 @@ jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"
       `createdAt`/`updatedAt`. Indexes on `userId` (unique) and `status` per ARCHITECTURE §4. Back-relation
       `application Application?` added to `User`. `prisma validate` + `migrate status` clean; client
       regenerated, lint/types/53 tests green. (Approval still doesn't grant `member` — the Jellyfin link does.)
-- [ ] **4.2** Questionnaire form (shadcn Form + Zod), mobile-friendly, saves against the
+- [x] **4.2** Questionnaire form (shadcn Form + Zod), mobile-friendly, saves against the
       applicant. Shows submitted state + status.
+      _Done:_ New `/apply` page (`requireUser`; **applicants only** — members/admins redirect to
+      `/profile`). Schema-driven questionnaire (`lib/validations/application.ts`): displayName, contact,
+      referralSource (select, options drive the Zod enum), watchInterests, devices, agreeToRules
+      (must be true), optional note — adding/removing a question is a schema+form edit, no migration
+      (answers stored as `Application.answers` Json). `ApplicationForm` (shadcn Form + RHF + zod) calls
+      the `submitApplication` server action (`app/apply/actions.ts`): re-validates, then **upserts** the
+      `Application` (create or resubmit → `pending`, clears prior review) and sets `User.applicationStatus
+    = pending` in **one `$transaction`**; non-applicants blocked server-side too. On submit the page
+      swaps to a **status view** (pending/approved/rejected copy + submitted date). Added dependency-free
+      `components/ui/textarea.tsx` + a native `<select>`/checkbox styled with tokens (no new Radix deps).
+      Unit tests: schema (5) + action (3: success/atomic, non-applicant blocked, invalid input no-write).
+      `/apply` verified to 307 → `/login` when signed out. (Edit/resubmit UX + admin review are 4.3/4.4.)
 - [ ] **4.3** Applicant status view (pending/approved/rejected); allow edit/resubmit per PRD.
 - [ ] **4.4** Admin-only review list with approve/reject; approve flips role to member.
 
