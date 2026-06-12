@@ -89,8 +89,18 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       already registered"), then auto-signs-in and redirects home (PRD §5.1). Signed-in users are
       redirected off `/signup`. Verified end-to-end against the live DB (create→session→redirect, and
       the duplicate-email error path). Unit tests cover the schema. Rate-limiting is task 2.6.
-- [ ] **2.3** Login (**username + password**) via Auth.js Credentials + logout. httpOnly JWT
+- [x] **2.3** Login (**username + password**) via Auth.js Credentials + logout. httpOnly JWT
       session cookie; generic failure message. Auth-aware nav.
+      _Done:_ `/login` page + `LoginForm` (shadcn Form + RHF + zod resolver) mirror signup. Shared
+      `loginSchema` (`lib/validations/auth.ts`) normalizes the username (trim+lowercase) to match the
+      `authorize` lookup; password just non-empty. Server action (`app/(auth)/login/actions.ts`) calls
+      `signIn("credentials", …)` and returns **one** generic `"Incorrect username or password"` for
+      both bad input and wrong creds — never reveals whether the username exists. Logout = `SignOutButton`
+      (server component: inline `signOut` server-action form) consumed by the auth-aware shell.
+      **Auth-aware nav:** `SiteHeader` is now async, reads `auth()` server-side, and renders username +
+      Log out vs. Sign in; `MobileNav` takes `user` + a server-rendered `signOutSlot`. Signed-in users
+      are redirected off `/login`. e2e `login.spec.ts` (desktop + Pixel-5): no horizontal scroll + empty-
+      submit field errors; unit tests cover `loginSchema`. Rate-limiting is task 2.6; ADMIN_EMAILS is 2.5.
 - [ ] **2.4** Route protection: server-side session checks; role/status gating
       (guest vs applicant vs member vs admin).
 - [ ] **2.5** Admin promotion: on sign-in, set role `admin` for emails in `ADMIN_EMAILS`.

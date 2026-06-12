@@ -30,3 +30,14 @@ export const signupSchema = z.object({
 // `input` = what the form holds (pre-normalization); `output` = normalized values.
 export type SignupInput = z.input<typeof signupSchema>;
 export type SignupValues = z.output<typeof signupSchema>;
+
+// Login is username + password only (ARCHITECTURE §5). Username is normalized the same
+// way as signup so the lookup matches. We deliberately keep the rules minimal — a wrong
+// username/password always yields one generic failure, never a per-field hint.
+export const loginSchema = z.object({
+  username: z.string().trim().toLowerCase().min(1, "Enter your username"),
+  password: z.string().min(1, "Enter your password"),
+});
+
+export type LoginInput = z.input<typeof loginSchema>;
+export type LoginValues = z.output<typeof loginSchema>;

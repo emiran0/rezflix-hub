@@ -1,8 +1,9 @@
-export type NavLink = { label: string; href: string }
+export type NavLink = { label: string; href: string };
 
-// Guest-facing shell navigation. Auth-aware variants (member/applicant/admin)
-// are layered on in task 2.3; the routes below are built in later phases.
+// Shell navigation links shown to everyone. The signed-in/out distinction (Sign in
+// vs. username + Log out) is handled in the header/mobile-nav from the session; these
+// per-role link sets (member/applicant/admin) get refined as their routes land.
 export const mainNavLinks: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Apply", href: "/apply" },
-]
+];
