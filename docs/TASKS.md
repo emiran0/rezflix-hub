@@ -113,7 +113,15 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done.
       `auth.ts`, which can't run in the edge runtime, and per-segment server checks are the stronger
       boundary — documented in ARCHITECTURE §6.1. Unit tests cover all four guards (both pass + redirect
       branches). The guards get consumed as protected routes land (apply/profile/admin, Phases 4–5).
-- [ ] **2.5** Admin promotion: on sign-in, set role `admin` for emails in `ADMIN_EMAILS`.
+- [x] **2.5** Admin promotion: on sign-in, set role `admin` for emails in `ADMIN_EMAILS`.
+      _Done:_ `lib/admin.ts` `isAdminEmail()` parses the server-only comma-separated allowlist
+      (case-insensitive, whitespace-tolerant; unset/empty → nobody). `authorize` (`auth.ts`) calls it
+      after the password check: if the email matches and the role isn't already `admin`, it persists
+      `role = admin` via `prisma.user.update` and returns the promoted principal — so the JWT/session
+      carry `admin` immediately. Promotes only (never auto-demotes in v1, per §5.4) and only writes when
+      the role actually changes. Runs on both login and signup's auto-sign-in. Unit tests cover the
+      allowlist parsing (match, case/space tolerance, empty entries); the `authorize` promotion wiring
+      itself isn't unit-tested (NextAuth-internal, not worth mocking). `ADMIN_EMAILS` already in `.env.example`.
 - [ ] **2.6** Basic rate-limiting on signup + login.
 
 ## Phase 3 — Link Jellyfin Account (becoming a member)

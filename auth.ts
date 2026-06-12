@@ -4,6 +4,7 @@ import type { Role } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
+import { isAdminEmail } from "@/lib/admin";
 
 // Auth.js v5 (NextAuth). Identity is Hub-owned: login is always username + password
 // against our own `User` table (see docs/ARCHITECTURE.md §5).
@@ -44,13 +45,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const ok = await verifyPassword(password, user.passwordHash);
         if (!ok) return null;
 
+        // Admin promotion (ARCHITECTURE §5.4): if this email is in the server-only
+        // ADMIN_EMAILS allowlist, persist role = admin on sign-in. Only promotes (never
+        // auto-demotes in v1) and only writes when the role actually changes.
+        let role = user.role;
+        if (role !== "admin" && isAdminEmail(user.email)) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { role: "admin" },
+          });
+          role = "admin";
+        }
+
         // Minimal principal — only what the token/session need. Never the passwordHash.
         return {
           id: user.id,
           username: user.username,
           email: user.email,
           name: user.displayName ?? user.username,
-          role: user.role,
+          role,
         };
       },
     }),
