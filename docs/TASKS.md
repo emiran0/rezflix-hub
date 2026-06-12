@@ -206,7 +206,9 @@ jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"
       `bio String?` (public, ≤280, enforced in Zod), `points Int @default(0)` (system-set), `tier`
       enum `@default(<lowest>)` (new `Tier` enum; system-set), `letterboxd`/`instagram`/`serializd`
       `String?` (socials), `bannerImage String?` (URL/path; default look when null), `favorites Json?`
-      (≤4–5 picks), `jellyfinUsername String?`, and `birthday DateTime?`. Then: - **Persist `jellyfinUsername`** in `linkJellyfin` (`result.jellyfinUsername` — currently discarded)
+      (≤4–5 picks), `jellyfinUsername String?`, and `birthday DateTime?`. **Note:** the profile-picture
+      column (`avatar String?`) **already exists** (since the init migration) — only `bannerImage` is new;
+      don't re-add `avatar`. Then: - **Persist `jellyfinUsername`** in `linkJellyfin` (`result.jellyfinUsername` — currently discarded)
       so 5.1 can show the linked Rezflix username. - **Birthday at sign-up (≥16):** keep the column **nullable** but make it **required in the signup
       Zod schema** + add an age-≥16 check (client + server) — enforces for new sign-ups without a
       backfill (no real users yet). Touches the built 2.2 signup flow. - Index only if a query needs it (none yet). `points`/`tier` are written by system logic later
