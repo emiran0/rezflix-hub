@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { MobileNav } from "@/components/mobile-nav";
 import { PageContainer } from "@/components/page-container";
 import { SignOutButton } from "@/components/auth/sign-out-button";
-import { mainNavLinks } from "@/components/nav-config";
+import { adminNavLinks, mainNavLinks } from "@/components/nav-config";
 
 // App shell top bar. Server component — it reads the session server-side and the only
 // client island is <MobileNav>. Sticky, translucent over the dark background, with a
@@ -13,6 +13,7 @@ import { mainNavLinks } from "@/components/nav-config";
 export async function SiteHeader() {
   const session = await auth();
   const user = session?.user ?? null;
+  const isAdmin = user?.role === "admin";
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -28,6 +29,13 @@ export async function SiteHeader() {
               <Link href={link.href}>{link.label}</Link>
             </Button>
           ))}
+          {isAdmin
+            ? adminNavLinks.map((link) => (
+                <Button key={link.href} variant="ghost" asChild>
+                  <Link href={link.href}>{link.label}</Link>
+                </Button>
+              ))
+            : null}
           {user ? (
             <>
               <Button variant="ghost" asChild>
@@ -48,6 +56,7 @@ export async function SiteHeader() {
         {/* The server-rendered logout control is handed to the client island as a slot. */}
         <MobileNav
           user={user}
+          isAdmin={isAdmin}
           signOutSlot={<SignOutButton className="h-11 w-full justify-start" />}
         />
       </PageContainer>

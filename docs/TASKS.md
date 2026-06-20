@@ -202,7 +202,7 @@ jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"
       (answers stored as `Application.answers` Json). `ApplicationForm` (shadcn Form + RHF + zod) calls
       the `submitApplication` server action (`app/apply/actions.ts`): re-validates, then **upserts** the
       `Application` (create or resubmit → `pending`, clears prior review) and sets `User.applicationStatus
-  = pending` in **one `$transaction`**; non-applicants blocked server-side too. On submit the page
+= pending` in **one `$transaction`**; non-applicants blocked server-side too. On submit the page
       swaps to a **status view** (pending/approved/rejected copy + submitted date). Added dependency-free
       `components/ui/textarea.tsx` + a native `<select>`/checkbox styled with tokens (no new Radix deps).
       Unit tests: schema (5) + action (3: success/atomic, non-applicant blocked, invalid input no-write).
@@ -218,7 +218,22 @@ jellyfinUsername }` or `{ ok:false, reason:"invalid_credentials"|"unreachable"|"
       Resubmit reuses the 4.2 upsert (→ `pending`, clears prior review). Unit tests added: `isResubmittable`
       (1) + action resubmit-from-rejected and approved-locked (2). `/apply` re-verified 307 → `/login`
       and compiles. (Admin approve/reject that sets these statuses is 4.4.)
-- [ ] **4.4** Admin-only review list with approve/reject; approve flips role to member.
+- [x] **4.4** Admin-only review list with approve/reject (approve sets `applicationStatus =
+    approved` only — it does **not** grant `member`; the Jellyfin link does, per PRD §5.3).
+      _Done:_ New `/admin/applications` page (`requireAdmin`) lists every application (pending
+      first, then by recency) with the applicant's username/email, submitted/reviewed dates, a
+      status badge, and the labeled questionnaire answers (read back from `Application.answers`).
+      `ApplicationReviewItem` (client) has Approve/Reject buttons (`useTransition`) calling the
+      `reviewApplication` server action (`app/admin/applications/actions.ts`): `requireAdmin`,
+      then one **interactive `$transaction`** sets `Application.status` (+ `reviewedBy`/`reviewedAt`)
+      and mirrors `User.applicationStatus` so the applicant's `/apply` status view stays in sync.
+      **Deviation from the task wording:** approve does **NOT** flip role to `member` — per PRD §5.3
+      and ARCHITECTURE §5.5 (and the 4.1 note), approval only sets `applicationStatus = approved`;
+      the admin then manually creates the Jellyfin account and the applicant links it to become a
+      member. Role is deliberately untouched here. Admin-only **Review** nav link added (desktop +
+      mobile, gated on `role === "admin"`; the route is still server-guarded). P2025 (application
+      gone) → friendly error. Unit tests (5): approve/reject writes + reviewer stamp + user mirror
+      (and asserts no role write), invalid decision, empty id, and the P2025 path.
 
 ## Phase 5 — Profile
 

@@ -7,3 +7,9 @@ export const mainNavLinks: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "Apply", href: "/apply" },
 ];
+
+// Admin-only links, rendered (in the header + mobile nav) only when the session role is
+// `admin`. The route itself is still guarded server-side via requireAdmin.
+export const adminNavLinks: NavLink[] = [
+  { label: "Review", href: "/admin/applications" },
+];

@@ -14,7 +14,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { mainNavLinks } from "@/components/nav-config";
+import { adminNavLinks, mainNavLinks } from "@/components/nav-config";
 
 // The mobile side of the responsive nav: a hamburger that opens a Sheet.
 // Hidden at md+ where the inline desktop nav takes over. Closing on navigation
@@ -22,9 +22,11 @@ import { mainNavLinks } from "@/components/nav-config";
 // (the header passes `user` + a server-rendered logout slot).
 export function MobileNav({
   user,
+  isAdmin = false,
   signOutSlot,
 }: {
   user: { username: string } | null;
+  isAdmin?: boolean;
   signOutSlot: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -60,6 +62,18 @@ export function MobileNav({
               </Link>
             </SheetClose>
           ))}
+          {isAdmin
+            ? adminNavLinks.map((link) => (
+                <SheetClose asChild key={link.href}>
+                  <Link
+                    href={link.href}
+                    className="rounded-md px-3 py-3 text-base hover:bg-accent hover:text-accent-foreground"
+                  >
+                    {link.label}
+                  </Link>
+                </SheetClose>
+              ))
+            : null}
           {user ? (
             <div className="mt-1 flex flex-col gap-2">
               <SheetClose asChild>
